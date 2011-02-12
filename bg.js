@@ -21,7 +21,7 @@
   initExtension = function() {
     chrome.contextMenus.create({
       title: "Edit in external editor",
-      contexts: ["all", "editable", "page"],
+      contexts: ["editable"],
       onclick: function(onClickData, tab) {
         return chrome.tabs.sendRequest(tab.id, {
           action: "edittextarea",
