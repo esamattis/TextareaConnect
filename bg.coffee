@@ -26,7 +26,7 @@ initExtension = ->
 
     chrome.contextMenus.create
         title: "Edit in external editor"
-        contexts: ["editable"]
+        contexts: ["editable",]
         onclick: ( onClickData, tab ) ->
             chrome.tabs.sendRequest tab.id, action: "edittextarea", onClickData: onClickData
 
@@ -46,7 +46,7 @@ initExtension = ->
 
 showTempNotification = (msg) ->
 
-    notification = webkitNotifications.createNotification "icon.png", 'TextAreaConnect', msg
+    notification = webkitNotifications.createNotification "icon.png", 'TextareaConnect', msg
 
     notification.show()
     setTimeout ->
@@ -91,10 +91,10 @@ class Connection
         @socket.on "connect", =>
             console.log "stopping connection poller"
             clearTimeout @reconnectTimer
-            showTempNotification "Connected to TextAreaServer at #{ @socket.transport.socket.URL }"
+            showTempNotification "Connected to TextareaServer at #{ @socket.transport.socket.URL }"
 
         @socket.on "disconnect", =>
-            showTempNotification "Disconnected from TextAreaServer at #{ @socket.transport.socket.URL }"
+            showTempNotification "Disconnected from TextareaServer at #{ @socket.transport.socket.URL }"
             @_reConnect()
 
         @socket.connect()

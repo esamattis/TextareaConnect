@@ -40,7 +40,7 @@
   };
   showTempNotification = function(msg) {
     var notification;
-    notification = webkitNotifications.createNotification("icon.png", 'TextAreaConnect', msg);
+    notification = webkitNotifications.createNotification("icon.png", 'TextareaConnect', msg);
     notification.show();
     return setTimeout(function() {
       return notification.cancel();
@@ -88,10 +88,10 @@
       this.socket.on("connect", __bind(function() {
         console.log("stopping connection poller");
         clearTimeout(this.reconnectTimer);
-        return showTempNotification("Connected to TextAreaServer at " + this.socket.transport.socket.URL);
+        return showTempNotification("Connected to TextareaServer at " + this.socket.transport.socket.URL);
       }, this));
       this.socket.on("disconnect", __bind(function() {
-        showTempNotification("Disconnected from TextAreaServer at " + this.socket.transport.socket.URL);
+        showTempNotification("Disconnected from TextareaServer at " + this.socket.transport.socket.URL);
         return this._reConnect();
       }, this));
       return this.socket.connect();
