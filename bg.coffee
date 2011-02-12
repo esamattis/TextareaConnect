@@ -1,28 +1,45 @@
 
 
-SETTINGS =
-    hostname: "localhost"
-    port: 8000
-    editor_cmd: "gedit {file}"
 
+localStorage.host = localStorage.host or "localhost"
+localStorage.port = localStorage.port or 32942
 
-
-socket = null
-ports = {}
-
+window.connection = null
 
 loadSocketIO = ->
     clearTimeout loadSocketIO.timer
-    console.log "trying to get io"
+    console.log "trying to get io from #{ localStorage.host }:#{ localStorage.port }"
     if not window.io
-        jQuery.getScript "http://#{ SETTINGS.hostname }:#{ SETTINGS.port }/socket.io/socket.io.js", ->
-            createSocket()
+        jQuery.getScript "http://#{ localStorage.host }:#{ localStorage.port }/socket.io/socket.io.js", ->
+            window.connection = new Connection(localStorage.host, localStorage.port)
+            initExtension()
             clearTimeout loadSocketIO.timer
 
         # TODO: Real error handling with real ajax calls
         loadSocketIO.timer = setTimeout loadSocketIO, 500
     else
         console.log "we aleready have io"
+
+
+
+initExtension = ->
+
+    chrome.contextMenus.create
+        title: "Edit in external editor"
+        contexts: ["all", "editable", "page"]
+        onclick: ( onClickData, tab ) ->
+            chrome.tabs.sendRequest tab.id, action: "edittextarea", onClickData: onClickData
+
+
+    chrome.extension.onConnect.addListener (port) ->
+        if port.name isnt "textareapipe"
+            return
+
+        port.onMessage.addListener (msg)  ->
+            connection.pageActions[msg.action](port, msg)
+
+
+
 
 
 
@@ -36,90 +53,74 @@ showTempNotification = (msg) ->
         notification.cancel()
     , 5000
 
-createSocket = ->
-
-    if createSocket.ran
-        return
-
-    socket = new io.Socket SETTINGS.hostname, port: SETTINGS.port
-
-    socket.on "message", (msg) ->
-        obj = JSON.parse msg
-        port = ports[obj.uuid]
-        port.postMessage obj
 
 
-    socket.on "connect", ->
-        console.log "stopping connection poller"
-        clearTimeout reConnect.timer
-        showTempNotification "Connected to TextAreaServer at #{ socket.transport.socket.URL }"
+class Connection
 
-    socket.on "disconnect", ->
-        showTempNotification "Disconnected from TextAreaServer at #{ socket.transport.socket.URL }"
-        reConnect()
+    constructor: (@host, @port) ->
+        @ports = {}
+        @socket = null
+        @pageActions =
+            open: (port, msg) =>
+                @ports[msg.uuid] = port
+                msg.type = msg.type or "txt"
+                @send msg
 
-    socket.connect()
+            delete: (port, msg) =>
+                for uuid in msg.uuids
+                    delete @ports[uuid]
+                @send msg
 
-    createSocket.ran = true
+        @initSocket()
+        console.log "creating new socket #{@host}:#{@port}"
 
-
-
-reConnect = ->
-    
-    console.log "polling for connection status: #{ socket.connected }"
-
-    if not socket.connected
-        socket.connect()
-    
-    clearTimeout reConnect.timer
-    # Retry
-    reConnect.timer = setTimeout reConnect, 2000
+    initSocket: ->
 
 
-
-selectorPort = null
-
-
-chrome.contextMenus.create
-    title: "Edit in external editor"
-    contexts: ["all", "editable", "page"]
-    onclick: ( onClickData, tab ) ->
-        chrome.tabs.sendRequest tab.id, action: "edittextarea", onClickData: onClickData
+        @socket?.disconnect()
 
 
-chrome.extension.onConnect.addListener (port) ->
-    if port.name isnt "textareapipe"
-        return
-        
-    port.onMessage.addListener (msg)  ->
-        actions[msg.action](port, msg)
+        @socket = new io.Socket @host, port: @port
+
+        @socket.on "message", (msg) =>
+            obj = JSON.parse msg
+            port = @ports[obj.uuid]
+            port.postMessage obj
+
+
+        @socket.on "connect", =>
+            console.log "stopping connection poller"
+            clearTimeout @reconnectTimer
+            showTempNotification "Connected to TextAreaServer at #{ @socket.transport.socket.URL }"
+
+        @socket.on "disconnect", =>
+            showTempNotification "Disconnected from TextAreaServer at #{ @socket.transport.socket.URL }"
+            @_reConnect()
+
+        @socket.connect()
+
+    send: (obj) ->
+        @socket.send JSON.stringify obj
+
+
+    _reConnect: ->
+
+        console.log "Trying to connect to #{ @socket.transport?.socket?.URL }"
+
+        if not @socket?.connected
+            @socket.connect()
+
+        clearTimeout @reconnectTimer
+
+        # Retry
+        @reconnectTimer = setTimeout =>
+            @_reConnect()
+        , 2000
 
 
 
-
-actions =
-
-    delete: (port, msg) ->
-
-        console.log "got from page for deleting"
-        console.log msg
-
-        for uuid in msg.uuids
-            delete ports[uuid]
-
-        socket.send JSON.stringify msg
-
-    open: (port, msg) ->
-
-        ports[msg.uuid] = port
-
-        msg.executable = SETTINGS.editor_cmd
-        msg.type = msg.type or "txt"
-        socket.send JSON.stringify msg
-        
 
 
 
 
 loadSocketIO()
-

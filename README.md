@@ -8,14 +8,6 @@ TextareaConnect relies on separate http-server, [TextareaServer][], for
 starting the external editors.
 
 
-
-## Features
-
-- Immediate updates with inotify and WebSockets. No polling!
-- Textarea edits goes both ways. You can even update the texteditor via
-  textarea :)
-
-
 TextareaConnect & TextareaServer are written using Node.JS, CoffeeScript,
 node-inotify, Socket.io and Chrome extension API.
 
