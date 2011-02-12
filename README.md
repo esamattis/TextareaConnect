@@ -1,5 +1,4 @@
 
-
 # TextareaConnect
 
 TextareaConnect a proof of concept for creating [It's All Text!][] clone for

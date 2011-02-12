@@ -1,6 +1,6 @@
 {
   "name": "TextAreaConnect",
-  "version": "1.0",
+  "version": "0.1.0",
   "description": "It's All Text! -clone for Chrome",
   "background_page" : "background.html",
   "options_page": "options.html",
