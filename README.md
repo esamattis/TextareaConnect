@@ -12,3 +12,14 @@ node-inotify, Socket.io and Chrome extension API.
 
 [It's All Text!]: https://addons.mozilla.org/en-US/firefox/addon/its-all-text/
 [TextareaServer]: https://github.com/epeli/TextareaServer
+
+
+## Changelog
+
+### 0.1.3
+
+- Flash textarea when it is updated
+- Show error message on edit request if the server is down
+
+
+
