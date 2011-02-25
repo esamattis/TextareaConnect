@@ -1,5 +1,6 @@
 (function() {
   var port, textAreas;
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   (function() {
     var siteId, timeStamp;
     timeStamp = new Date().getTime();
@@ -20,7 +21,7 @@
       }
     };
     $.fn.uuid.counter = 0;
-    return $.fn.editInExternalEditor = function(port) {
+    $.fn.editInExternalEditor = function(port) {
       var sendToEditor, that;
       that = $(this);
       if (that.data("server")) {
@@ -40,6 +41,12 @@
       };
       return sendToEditor(true);
     };
+    return $.fn.flashBg = function() {
+      this.addClass("textareaconnect-updated");
+      return setTimeout(__bind(function() {
+        return this.removeClass("textareaconnect-updated");
+      }, this), 100);
+    };
   })();
   textAreas = {};
   port = chrome.extension.connect({
@@ -48,7 +55,11 @@
   port.onMessage.addListener(function(obj) {
     var textarea;
     textarea = textAreas[obj.uuid];
-    return textarea.val(obj.textarea);
+    if (obj.textarea === textarea.val()) {
+      return;
+    }
+    textarea.val(obj.textarea);
+    return textarea.flashBg();
   });
   chrome.extension.onRequest.addListener(function(req, sender) {
     var realUrl, textarea;

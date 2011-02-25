@@ -39,6 +39,12 @@ do ->
         sendToEditor(true)
 
 
+    $.fn.flashBg = ->
+        @addClass "textareaconnect-updated"
+        setTimeout =>
+            @removeClass "textareaconnect-updated"
+        , 100
+
 
 textAreas = {}
 
@@ -46,7 +52,11 @@ textAreas = {}
 port = chrome.extension.connect  name: "textareapipe"
 port.onMessage.addListener (obj) ->
     textarea = textAreas[obj.uuid]
+    # No flashing if content did not get updated.
+    if obj.textarea is textarea.val()
+        return
     textarea.val obj.textarea
+    textarea.flashBg()
 
 
 # Listen contextmenu clicks
