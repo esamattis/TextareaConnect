@@ -100,14 +100,19 @@ class Connection
         @socket.connect()
 
     send: (obj) ->
-        @socket.send JSON.stringify obj
+        if not @isConnected()
+          alert "Sorry, not connected to TextareaServer"
+        else
+          @socket.send JSON.stringify obj
 
+    isConnected: ->
+        @socket?.connected
 
     _reConnect: ->
 
-        console.log "Trying to connect to #{ @socket.transport?.socket?.URL }"
+        # console.log "Trying to connect to #{ @socket.transport?.socket?.URL }"
 
-        if not @socket?.connected
+        if not @isConnected()
             @socket.connect()
 
         clearTimeout @reconnectTimer

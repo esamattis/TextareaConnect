@@ -97,12 +97,18 @@
       return this.socket.connect();
     };
     Connection.prototype.send = function(obj) {
-      return this.socket.send(JSON.stringify(obj));
+      if (!this.isConnected()) {
+        return alert("Sorry, not connected to TextareaServer");
+      } else {
+        return this.socket.send(JSON.stringify(obj));
+      }
+    };
+    Connection.prototype.isConnected = function() {
+      var _ref;
+      return (_ref = this.socket) != null ? _ref.connected : void 0;
     };
     Connection.prototype._reConnect = function() {
-      var _ref, _ref2, _ref3;
-      console.log("Trying to connect to " + ((_ref = this.socket.transport) != null ? (_ref2 = _ref.socket) != null ? _ref2.URL : void 0 : void 0));
-      if (!((_ref3 = this.socket) != null ? _ref3.connected : void 0)) {
+      if (!this.isConnected()) {
         this.socket.connect();
       }
       clearTimeout(this.reconnectTimer);
