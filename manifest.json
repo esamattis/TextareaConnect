@@ -1,7 +1,7 @@
 {
   "name": "TextareaConnect",
-  "version": "0.1.1",
-  "description": "It's All Text! -clone for Chrome",
+  "version": "0.1.2",
+  "description": "Edit textareas using any external editor!",
   "background_page" : "background.html",
   "options_page": "options.html",
     "icons": {
